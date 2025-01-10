@@ -270,15 +270,28 @@ def cont_clean(page, fontrefs):
 
     doc = page.parent
     for xref in fontrefs.keys():
-        xref0 = 0 + xref
-        if xref0 == 0:  # the page contents
-            xref0 = page.get_contents()[0]  # there is only one /Contents obj now
-        cont = doc.xref_stream(xref0)
+        xref0 = page.get_contents()[0]  # there is only one /Contents obj now
+        cont = pretty_content(page)
         cont_lines = cont.splitlines()
-        changed, cont_lines = remove_font(fontrefs[xref], cont_lines)
+        changed, cont_lines = remove_font(fontrefs[xref], cont.splitlines())
         if changed:
             cont = b"\n".join(cont_lines) + b"\n"
             doc.update_stream(xref0, cont)  # replace command source
+
+
+def pretty_content(page):
+    doc = page.parent
+    new = fitz.open()
+    new.insert_pdf(doc, from_page=page.number, to_page=page.number)
+    pdfdata = new.tobytes(pretty=True, clean=True)
+    new.close()
+    new = fitz.open("pdf", pdfdata)
+    xrefs = new[0].get_contents()
+    if not xrefs:
+        return b""
+    contents = new.xref_stream(xrefs[0])
+    new.close()
+    return contents
 
 
 def clean_fontnames(page):
