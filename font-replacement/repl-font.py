@@ -489,6 +489,7 @@ for page in indoc:
                 # guard against non-utf8 characters
                 textb = text.encode("utf8", errors="backslashreplace")
                 text = textb.decode("utf8", errors="backslashreplace")
+                text = text.replace("ff", chr(0xFB00)).replace("fi", chr(0xFB01)).replace("fl", chr(0xFB02)).replace("ffi", chr(0xFB03)).replace("ffl", chr(0xFB04))
                 span["text"] = text
                 if wdir != [1, 0]:  # special treatment for tilted text
                     tilted_span(page, wdir, span, font)
